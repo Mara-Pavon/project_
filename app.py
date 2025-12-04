@@ -1,38 +1,48 @@
 import streamlit as st
 from backend import PreventivoAssistant
 
-st.set_page_config(page_title="Catering Assistant", page_icon="🍽️")
+# Configuración de página
+st.set_page_config(
+    page_title="Catering Assistant",
+    page_icon="🍽️",
+    layout="centered"
+)
 
-st.title("Catering Assistant")
-st.write("Assistente AI per creare preventivi in modo automatico.")
-st.write("Dimmi che tipo di evento vuoi organizzare 🎉: matrimonio, compleanno, battesimo, laurea…")
+# Contenedor para el título
+with st.container():
+    st.title("Catering Assistant🍽️ ")
+    st.markdown("**Strumento AI per generare preventivi di catering in pochi istanti.**")
+    st.caption("Puoi dirmi che tipo di evento stai organizzando: matrimonio, compleanno, battesimo, laurea o qualsiasi altra occasione.")
 
+st.write("---")
+
+# Inicialización del estado de la sesión
 if "bot" not in st.session_state:
     st.session_state.bot = PreventivoAssistant()
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        ("assistant", "Ciao! Sono qui per aiutarti a costruire un preventivo preciso e adatto al tuo evento. Dimmi cosa stai pianificando e procediamo insieme.")
+    ]
 
-# Mostrar historial.
-
+# Mostrar mensajes existentes - SIN contenedores adicionales
 for msg in st.session_state.messages:
     role, text = msg
-    if role == "user":
-        st.chat_message("user").write(text)
-    else:
-        st.chat_message("assistant").write(text)
+    st.chat_message(role).write(text)
 
-# Input del usuario
-user_input = st.chat_input("Scrivi la tua richiesta...")
+# Usar st.chat_input 
+user_input = st.chat_input("Scrivi la tua richiesta qui...")
 
 if user_input:
-    # Mostrar mensaje utente
+    # Agregar mensaje del usuario
     st.session_state.messages.append(("user", user_input))
-    st.chat_message("user").write(user_input)
-
-    # Obtener respuesta del bot
-    response = st.session_state.bot.ask(user_input)
-
-    # Mostrar respuesta asistente
+    
+    # Obtener respuesta del asistente
+    with st.spinner("Sto elaborando la tua richiesta..."):
+        response = st.session_state.bot.ask(user_input)
+    
+    # Agregar respuesta del asistente
     st.session_state.messages.append(("assistant", response))
-    st.chat_message("assistant").write(response)
+    
+    # Forzar recarga para mostrar los nuevos mensajes
+    st.rerun()
